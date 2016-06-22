@@ -120,6 +120,8 @@ def add_data(request):
    authors = [item[0] for item in authors_from_bd]
    articles_from_bd = DBSession.query(Article.name).all()
    articles = [item[0] for item in articles_from_bd]
+   journals_from_bd = DBSession.query(Journal.name).all()
+   journals = [item[0] for item in journals_from_bd]
 
 # Вставка журнала
    if 'journal.submitted' in request.params:
@@ -131,13 +133,15 @@ def add_data(request):
                 'journal_error': 'Такой журнал уже есть в базе данных',
                 'universities': universities,
                 'authors': authors,
-                'articles': articles}
+                'articles': articles,
+                'journals': journals}
       if name == "" or publishing_country == "":
          return{'url': request.application_url + '/addarticle/',
                 'journal_error': 'Нельзя оставлять пустые поля',
                 'universities': universities,
                 'authors': authors,
-                'articles': articles}
+                'articles': articles,
+                'journals': journals}
       try:
          new_journal = Journal (name = name,
                                 publishing_country = publishing_country)
@@ -147,7 +151,8 @@ def add_data(request):
                 'journal_error': 'Не удалось добавить в базу данных',
                 'universities': universities,
                 'authors': authors,
-                'articles': articles}
+                'articles': articles,
+                'journals': journals}
 
 # Вставка университета  
    if 'university.submitted' in request.params:
@@ -160,13 +165,15 @@ def add_data(request):
                 'university_error': 'Такой университет уже есть в базе данных',
                 'universities': universities,
                 'authors': authors,
-                'articles': articles}
+                'articles': articles,
+                'journals': journals}
       if name == "" or country == "" or city == "":
          return{'url': request.application_url + '/addarticle/',
                 'university_error': 'Нельзя оставлять пустые поля',
                 'universities': universities,
                 'authors': authors,
-                'articles': articles}
+                'articles': articles,
+                'journals': journals}
       try:
          new_university = University (name = name,
                                       country = country,
@@ -177,7 +184,8 @@ def add_data(request):
                 'university_error': 'Не удалось добавить в базу данных',
                 'universities': universities,
                 'authors': authors,
-                'articles': articles}
+                'articles': articles,
+                'journals': journals}
 
 # Вставка автора
    if 'author.submitted' in request.params:
@@ -189,15 +197,18 @@ def add_data(request):
                 'author_error': 'Такой автор уже есть в базе данных',
                 'universities': universities,
                 'authors': authors,
-                'articles': articles}
+                'articles': articles,
+                'journals': journals}
       if name == "":
          return{'url': request.application_url + '/addarticle/',
                 'author_error': 'Нельзя оставлять пустые поля',
                 'universities': universities,
                 'authors': authors,
-                'articles': articles}
+                'articles': articles,
+                'journals': journals}
       try:
-         university_id = DBSession.query(University.id).filter(University.name==university).first()
+         university_id_tuple = DBSession.query(University.id).filter(University.name==university).first()
+         university_id = university_id_tuple[0]
          new_author = Author (full_name = name,
                               university_id = university_id)
          DBSession.add(new_author)
@@ -206,7 +217,8 @@ def add_data(request):
                 'author_error': 'Не удалось добавить в базу данных',
                 'universities': universities,
                 'authors': authors,
-                'articles': articles}
+                'articles': articles,
+                'journals': journals}
       
 # Вставка пары автор-статья
    if 'article_author.submitted' in request.params:
@@ -224,7 +236,8 @@ def add_data(request):
                 'article_author_error': 'Такая пара статья-автор уже есть в базе данных',
                 'universities': universities,
                 'authors': authors,
-                'articles': articles}
+                'articles': articles,
+                'journals': journals}
       try:
          new_article_author = Article_Author (article_id = article_id,
                               author_id = author_id)
@@ -234,7 +247,63 @@ def add_data(request):
                 'article_author_error': 'Не удалось добавить в базу данных',
                 'universities': universities,
                 'authors': authors,
-                'articles': articles}
+                'articles': articles,
+                'journals': journals}
+
+# Вставка статьи
+   if 'article.submitted' in request.params:
+      name = request.params['article.name']
+      keywords = request.params['article.keywords']
+      abstract = request.params['article.abstract']
+      file = request.params['article.file']
+      journal_name = request.params['article.journal']
+      journal_id_tuple = DBSession.query(Journal.id).filter(Journal.name == journal_name).first()
+      journal_id = journal_id_tuple[0]
+      year_of_publishing = int(request.params['article.year'])
+      number_of_journal = int(request.params['article.number'])
+      start_page = int(request.params['article.start_page'])
+      end_page = int(request.params['article.end_page'])
+      
+      article_from_bd = DBSession.query(Article).\
+                       filter(Article.name == name).first()
+      if article_from_bd:
+         return{'url': request.application_url + '/addarticle/',
+                'article_error': 'Такая статья уже есть в базе данных',
+                'universities': universities,
+                'authors': authors,
+                'articles': articles,
+                'journals': journals}
+      if name == "" or keywords == "" or abstract == "" \
+         or file == "" or year_of_publishing <= 1900 or number_of_journal <= 0 \
+         or start_page <= 0 or end_page <= 0:
+         return{'url': request.application_url + '/addarticle/',
+                'article_error': 'Нельзя оставлять пустые поля или введено неверное значение числовых полей',
+                'universities': universities,
+                'authors': authors,
+                'articles': articles,
+                'journals': journals}
+      try:
+         user_id_tuple = DBSession.query(User.id).filter(User.login==request.unauthenticated_userid).first()
+         user_id = user_id_tuple[0]
+         new_article = Article  (name = name,
+                                 keywords = keywords,
+                                 abstract = abstract,
+                                 file = file,
+                                 journal_id = journal_id,
+                                 year_of_publishing = year_of_publishing,
+                                 number_of_journal = number_of_journal,
+                                 start_page = start_page,
+                                 end_page = end_page,
+                                 user_id = user_id)
+         DBSession.add(new_article)
+      except:
+         return{'url': request.application_url + '/addarticle/',
+                'article_author_error': 'Не удалось добавить в базу данных',
+                'universities': universities,
+                'authors': authors,
+                'articles': articles,
+                'journals': journals}
+
 
       
 
@@ -243,7 +312,8 @@ def add_data(request):
          'bad_password': False,
          'universities': universities,
          'authors': authors,
-         'articles': articles}
+         'articles': articles,
+         'journals': journals}
    
 
 

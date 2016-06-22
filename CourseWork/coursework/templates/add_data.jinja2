@@ -48,7 +48,7 @@
 						<div class="block">
 							<p>Название</p>
 							<div class="input-group">
-								<textarea class="form-control" name="journal.name" cols="40" rows="5"></textarea>
+								<textarea class="form-control" name="journal.name" cols="100" rows="5"></textarea>
 							</div>
 						</div>
 
@@ -84,7 +84,7 @@
 						<div class="block">
 							<p>Название</p>
 							<div class="input-group">
-								<textarea class="form-control" name="university.name" cols="40" rows="5"></textarea>
+								<textarea class="form-control" name="university.name" cols="100" rows="5"></textarea>
 							</div>
 						</div>
 
@@ -215,36 +215,36 @@
 						<div class="block">
 							<p>Название</p>
 							<div class="input-group">
-								<textarea class="form-control" name="article.name" cols="40" rows="5"></textarea>
+								<textarea class="form-control" name="article.name" cols="100" rows="5"></textarea>
 							</div>
 						</div>
 
 						<div class="block">
 							<p>Ключевые слова</p>
 							<div class="input-group">
-								<textarea class="form-control" name="article.keywords" cols="40" rows="5"></textarea>
+								<textarea class="form-control" name="article.keywords" cols="100" rows="5"></textarea>
 							</div>
 						</div>
 
 						<div class="block">
 							<p>Аннотация</p>
 							<div class="input-group">
-								<textarea class="form-control" name="article.abstract" cols="100" rows="20"></textarea>
+								<textarea class="form-control" name="article.abstract" cols="100" rows="15"></textarea>
 							</div>
 						</div>
 
 						<div class="block">
-							<p>Страна</p>
+							<p>Название файла в папке files</p>
 							<div class="input-group">
-								<input type="text" class="form-control" name="university.country">
+								<input type="text" class="form-control" name="article.file">
 							</div>
 						</div>
 
 						<div class="block">
-							<p>Автор</p>
+							<p>Журнал</p>
 							<div class="input-group">
-								<select class="form-control" size="1" name="article_author.author">
-									{% for item in authors %}
+								<select class="form-control" size="1" name="article.journal">
+									{% for item in journals %}
 										<option>{{item}}</option>
 									{% endfor %}
 								</select>
@@ -252,18 +252,35 @@
 						</div>
 
 						<div class="block">
-							<p>Статья</p>
+							<p>Год публикации</p>
 							<div class="input-group">
-								<select class="form-control" size="1" name="article_author.article">
-									{% for item in articles %}
-										<option>{{item}}</option>
-									{% endfor %}
-								</select>
+								<input type="number" class="form-control" name="article.year" value="2016">
 							</div>
 						</div>
 
 						<div class="block">
-							<button type="submit" name="article_author.submitted" class="btn btn-default">Добавить автора для статьи</button>
+							<p>Номер журнала</p>
+							<div class="input-group">
+								<input type="number" class="form-control" name="article.number" value="1">
+							</div>
+						</div>
+
+						<div class="block">
+							<p>Начальная страница</p>
+							<div class="input-group">
+								<input type="number" class="form-control" name="article.start_page" value="1">
+							</div>
+						</div>
+
+						<div class="block">
+							<p>Конечная страница</p>
+							<div class="input-group">
+								<input type="number" class="form-control" name="article.end_page" value="2">
+							</div>
+						</div>
+
+						<div class="block">
+							<button type="submit" name="article.submitted" class="btn btn-default">Добавить статью</button>
 						</div>
 					</form> 
 				</div>
