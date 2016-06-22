@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>{{name}}</title>
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+		<script>
+			$(document).ready(function() {
+				w = window.innerWidth;
+				if(w) {
+			      var h = window.innerHeight;
+			    } else {
+			      var h = document.body.clientHeight;
+			    }
+				console.log(w);
+				$("embed").attr("width", w);
+				$("embed").attr("height", (h - 45 - 2));
+			});
+		</script>
+	</head>
+	<body>
+		<embed src="{{request.static_url('coursework:files/'+file)}}"/>
+	</body>
+</html>

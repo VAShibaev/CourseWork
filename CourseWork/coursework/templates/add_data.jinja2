@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Вход пользователя</title>
+		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/
+		bootstrap/3.3.1/css/bootstrap.min.css"/>
+		<style type="text/css">
+
+			.centre {
+				margin: 50px;
+			}	
+			.error {
+				color: red;
+			}
+			.block {
+				margin: 20px;
+			}	
+			input {
+				width: 400px;
+			}	
+		</style>
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+	</head>
+	<body>
+		<nav class="navbar navbar-inverse" role="navigation">
+			<div class="container-fluid">
+				<div class="navbar-header">
+			      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+			          </button>
+			      <a class="navbar-brand" href="/">Домой</a>
+			    </div>
+			</div>
+		</nav>
+
+
+		<div class="centre">
+			<div class="row">
+				<div class="col-md-1">
+				</div>
+				<div class="col-md-8">
+					<form action={{url}} method="POST">
+						<h5>Добавление журнала</h5>
+						{%if journal_error %}
+						<h5 class="error">{{journal_error}}</h5>
+						{% endif %}
+
+						<div class="block">
+							<p>Название</p>
+							<div class="input-group">
+								<textarea class="form-control" name="journal.name" cols="40" rows="5"></textarea>
+							</div>
+						</div>
+
+						<div class="block">
+							<p>Страна издатель</p>
+							<div class="input-group">
+								<input type="text" class="form-control" name="journal.country">
+							</div>
+						</div>
+
+						<div class="block">
+							<button type="submit" name="journal.submitted" class="btn btn-default">Добавить журнал</button>
+						</div>
+					</form> 
+				</div>
+				<div class="col-md-3">
+				</div>
+			</div>
+		</div>		
+
+
+		<div class="centre">
+			<div class="row">
+				<div class="col-md-1">
+				</div>
+				<div class="col-md-8">
+					<form action={{url}} method="POST">
+						<h5>Добавление университета</h5>
+						{%if university_error %}
+						<h5 class="error">{{university_error}}</h5>
+						{% endif %}
+
+						<div class="block">
+							<p>Название</p>
+							<div class="input-group">
+								<textarea class="form-control" name="university.name" cols="40" rows="5"></textarea>
+							</div>
+						</div>
+
+						<div class="block">
+							<p>Страна</p>
+							<div class="input-group">
+								<input type="text" class="form-control" name="university.country">
+							</div>
+						</div>
+
+						<div class="block">
+							<p>Город</p>
+							<div class="input-group">
+								<input type="text" class="form-control" name="university.city">
+							</div>
+						</div>
+
+						<div class="block">
+							<button type="submit" name="university.submitted" class="btn btn-default">Добавить университет</button>
+						</div>
+					</form> 
+				</div>
+				<div class="col-md-3">
+				</div>
+			</div>
+		</div>
+
+
+
+		<div class="centre">
+			<div class="row">
+				<div class="col-md-1">
+				</div>
+				<div class="col-md-8">
+					<form action={{url}} method="POST">
+						<h5>Добавление автора</h5>
+						{%if author_error %}
+						<h5 class="error">{{author_error}}</h5>
+						{% endif %}
+
+						<div class="block">
+							<p>Полное имя</p>
+							<div class="input-group">
+								<input type="text" class="form-control" name="author.full_name">
+							</div>
+						</div>
+
+						<div class="block">
+							<p>Университет</p>
+							<div class="input-group">
+								<select class="form-control" size="1" name="author.university">
+									{% for item in universities %}
+										<option>{{item}}</option>
+									{% endfor %}
+								</select>
+							</div>
+						</div>
+
+						<div class="block">
+							<button type="submit" name="author.submitted" class="btn btn-default">Добавить автора</button>
+						</div>
+					</form> 
+				</div>
+				<div class="col-md-3">
+				</div>
+			</div>
+		</div>
+
+
+
+		<div class="centre">
+			<div class="row">
+				<div class="col-md-1">
+				</div>
+				<div class="col-md-8">
+					<form action={{url}} method="POST">
+						<h5>Добавление автора для статьи</h5>
+						{%if article_author_error %}
+						<h5 class="error">{{article_author_error}}</h5>
+						{% endif %}
+
+						<div class="block">
+							<p>Автор</p>
+							<div class="input-group">
+								<select class="form-control" size="1" name="article_author.author">
+									{% for item in authors %}
+										<option>{{item}}</option>
+									{% endfor %}
+								</select>
+							</div>
+						</div>
+
+						<div class="block">
+							<p>Статья</p>
+							<div class="input-group">
+								<select class="form-control" size="1" name="article_author.article">
+									{% for item in articles %}
+										<option>{{item}}</option>
+									{% endfor %}
+								</select>
+							</div>
+						</div>
+
+						<div class="block">
+							<button type="submit" name="article_author.submitted" class="btn btn-default">Добавить автора для статьи</button>
+						</div>
+					</form> 
+				</div>
+				<div class="col-md-3">
+				</div>
+			</div>
+		</div>
+
+
+
+
+		<div class="centre">
+			<div class="row">
+				<div class="col-md-1">
+				</div>
+				<div class="col-md-8">
+					<form action={{url}} method="POST">
+						<h5>Добавление статьи</h5>
+						{%if article_error %}
+						<h5 class="error">{{article_error}}</h5>
+						{% endif %}
+
+						<div class="block">
+							<p>Название</p>
+							<div class="input-group">
+								<textarea class="form-control" name="article.name" cols="40" rows="5"></textarea>
+							</div>
+						</div>
+
+						<div class="block">
+							<p>Ключевые слова</p>
+							<div class="input-group">
+								<textarea class="form-control" name="article.keywords" cols="40" rows="5"></textarea>
+							</div>
+						</div>
+
+						<div class="block">
+							<p>Аннотация</p>
+							<div class="input-group">
+								<textarea class="form-control" name="article.abstract" cols="100" rows="20"></textarea>
+							</div>
+						</div>
+
+						<div class="block">
+							<p>Страна</p>
+							<div class="input-group">
+								<input type="text" class="form-control" name="university.country">
+							</div>
+						</div>
+
+						<div class="block">
+							<p>Автор</p>
+							<div class="input-group">
+								<select class="form-control" size="1" name="article_author.author">
+									{% for item in authors %}
+										<option>{{item}}</option>
+									{% endfor %}
+								</select>
+							</div>
+						</div>
+
+						<div class="block">
+							<p>Статья</p>
+							<div class="input-group">
+								<select class="form-control" size="1" name="article_author.article">
+									{% for item in articles %}
+										<option>{{item}}</option>
+									{% endfor %}
+								</select>
+							</div>
+						</div>
+
+						<div class="block">
+							<button type="submit" name="article_author.submitted" class="btn btn-default">Добавить автора для статьи</button>
+						</div>
+					</form> 
+				</div>
+				<div class="col-md-3">
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

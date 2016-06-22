@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>{{name}}</title>
+		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/
+		bootstrap/3.3.1/css/bootstrap.min.css"/>
+		<style type="text/css">
+			body {
+				background-image: url({{request.static_url('coursework:static/background.jpg')}});
+			}
+			.topic {
+				color: gray;
+			}
+
+			.block1 {
+				margin-top: 60px;
+			}
+			.block2 {
+				margin-top: 40px;
+			}
+
+			.back {
+				background: white;
+			}
+			
+			.not_registered {
+				color: red;
+			}
+		</style>
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+		<script>
+			$(document).ready(function() {
+				$(".dropdown").mouseover(function() {
+					$(".dropdown").addClass("open");
+				});
+				$(".dropdown").mouseout(function() {
+					$(".dropdown").removeClass("open");
+				});
+			});
+		</script>
+	</head>
+	<body>
+		<nav class="navbar navbar-inverse" role="navigation">
+			<div class="container-fluid">
+				<div class="navbar-header">
+			      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+			          </button>
+			      <a class="navbar-brand" href="/">Домой</a>
+			    </div>
+
+			    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+				    <ul class="nav navbar-nav navbar-right">
+
+				    	{% if request.unauthenticated_userid == None %}
+				    	<li><a href="/login/">Войти</a></li>
+				    	{% else %}
+				        <li class="dropdown">
+				          	<a href="#" class="dropdown-toggle" data-toggle="dropdown">
+				          		{{request.unauthenticated_userid}} <span class="caret"></span>
+				          	</a>
+				          	<ul class="dropdown-menu">
+				          		{% if request.unauthenticated_userid == 'admin' %}
+				            	<li><a href="/addarticle/">Добавить данные</a></li>
+				            	{% endif %}
+				            	<li class="divider"></li>
+				            	<li><a href="/logout/">Выйти</a></li>
+				          	</ul>
+				        </li>
+				        {% endif %}
+				    </ul>
+				</div>
+			</div>
+		</nav>
+		<div class="block1">
+			<h4 class="text-center" style="color: white">{{name}}</h4>
+			<div class="block2">
+				<div class="row">
+					<div class="col-md-3">
+					</div>
+					<div class="col-md-6 back">
+
+						<p class="topic">Авторы</p>
+						{% for author in authors %}
+							<p><big>{{author}}</big></p>
+						{% endfor %}
+
+
+						<p class="topic">Журнал</p>
+							<p>{{journal}}</p>
+
+						<p> <span class="topic">Выпуск: </span> №{{number}} / {{year}}</p>
+
+						<p> <span class="topic">Ключевые слова: </span> {{keywords}}</p>
+
+						<p> <span class="topic">Аннотация: </span> {{abstract}}</p>
+
+						{% if request.unauthenticated_userid != None %}
+						<p> <a href="../file/id%3D{{id}}">Ссылка на файл</a></p>
+						{% else %}
+						<p class="not_registered"> Скачать файл могут только зарегистрированные пользователи </p>
+						{% endif %}
+
+						<p> <span class="topic">Статья загружена пользователем с ником </span> {{user_load.login}}</p>
+
+					</div>
+					<div class="col-md-3">
+					</div>
+				</div>
+			</div>
+		<div>
+	</body>
+</html>

@@ -2,20 +2,250 @@ from pyramid.response import Response
 from pyramid.view import view_config
 
 from sqlalchemy.exc import DBAPIError
+from pyramid.httpexceptions import HTTPFound
+from pyramid.security import Allow, forget, remember
+
+from datetime import datetime
 
 from .models import (
     DBSession,
-    MyModel,
+    University,
+    Article,
+    Article_Author,
+    Journal,
+    User,
+    Author
     )
 
 
-@view_config(route_name='home', renderer='templates/mytemplate.pt')
+@view_config(route_name='home',
+             renderer='templates/Main.jinja2', permission='view')
 def my_view(request):
-    try:
-        one = DBSession.query(MyModel).filter(MyModel.name == 'one').first()
-    except DBAPIError:
-        return Response(conn_err_msg, content_type='text/plain', status_int=500)
-    return {'one': one, 'project': 'CourseWork'}
+   articles_list = DBSession.query(Article).all()
+   return {'username': None,
+           'articles': articles_list}
+
+
+
+@view_config(name='article',
+             renderer='templates/Article-View.jinja2', permission='view')
+def article_view(request):
+   words_list = request.url.split('%3D')
+   article_id = words_list[len(words_list) - 1]
+   article = Article.get_by_id(article_id)
+
+   authors = Article_Author.get_authors_by_article_id(article_id)
+   journal = Journal.get_name_by_id(article.journal_id)
+   return {'id': article_id,
+           'name': article.name, 
+           'authors': authors,
+           'journal': journal,
+           'number': article.number_of_journal,
+           'year': article.year_of_publishing,
+           'keywords': article.keywords,
+           'abstract': article.abstract,
+           'username': None,
+           'link': article.file,
+           'user_load': article.user}
+
+
+@view_config(name='file',
+             renderer='templates/PDF-View.jinja2', permission='view')
+def download_file(request):
+   words_list = request.url.split('%3D')
+   article_id = words_list[len(words_list) - 1]
+   article = Article.get_by_id(article_id)
+   print(request.user_agent)
+   return {'name': article.name,
+           'file': article.file}
+
+
+
+@view_config(name='login', renderer='templates/login.jinja2', permission='view')
+def login(request):
+   if 'form.submitted' in request.params:
+      login = request.params['login']
+      password = request.params['password']
+      password_from_bd = DBSession.query(User.password).filter(User.login==login).first()
+      if password_from_bd and password == password_from_bd[0]:
+         headers = remember(request, login)
+         return HTTPFound(location=request.application_url +'/',
+                          headers=headers)
+      return{'url': request.application_url + '/login/',
+             'bad_password': True}
+   return{
+         'url': request.application_url + '/login/',
+         'bad_password': False }
+
+
+
+@view_config(name='logout')
+def logout(request):
+   headers = forget(request)
+   return HTTPFound(location=request.application_url +'/',
+                     headers=headers)
+
+
+@view_config(name='registration', renderer='templates/registration.jinja2', permission='view')
+def registration(request):
+   if 'form.submitted' in request.params:
+      login = request.params['login']
+      password = request.params['password']
+      password_from_bd = DBSession.query(User.password).filter(User.login==login).first()
+      if password_from_bd or password == "":
+         return{'url': request.application_url + '/registration/',
+             'bad_parameters': True}
+      try:
+         new_user = User(login=login,
+                      password=password,
+                      date_of_registration = datetime.now())
+         DBSession.add(new_user)
+         headers = remember(request,login)
+         return HTTPFound(location=request.application_url +'/',
+                          headers=headers)
+      except:
+         return{'url': request.application_url + '/registration/',
+             'bad_parameters': True}
+
+   return{'url': request.application_url + '/registration/',
+         'bad_parameters': False }
+
+
+
+@view_config(name='addarticle', renderer='templates/add_data.jinja2', permission='view')
+def add_data(request):
+   universities_from_bd = DBSession.query(University.name).all()
+   universities = [item[0] for item in universities_from_bd]
+   authors_from_bd = DBSession.query(Author.full_name).all()
+   authors = [item[0] for item in authors_from_bd]
+   articles_from_bd = DBSession.query(Article.name).all()
+   articles = [item[0] for item in articles_from_bd]
+
+# Вставка журнала
+   if 'journal.submitted' in request.params:
+      name = request.params['journal.name']
+      publishing_country = request.params['journal.country']
+      journal_from_bd = DBSession.query(Journal).filter(Journal.name==name).first()
+      if journal_from_bd:
+         return{'url': request.application_url + '/addarticle/',
+                'journal_error': 'Такой журнал уже есть в базе данных',
+                'universities': universities,
+                'authors': authors,
+                'articles': articles}
+      if name == "" or publishing_country == "":
+         return{'url': request.application_url + '/addarticle/',
+                'journal_error': 'Нельзя оставлять пустые поля',
+                'universities': universities,
+                'authors': authors,
+                'articles': articles}
+      try:
+         new_journal = Journal (name = name,
+                                publishing_country = publishing_country)
+         DBSession.add(new_journal)
+      except:
+         return{'url': request.application_url + '/addarticle/',
+                'journal_error': 'Не удалось добавить в базу данных',
+                'universities': universities,
+                'authors': authors,
+                'articles': articles}
+
+# Вставка университета  
+   if 'university.submitted' in request.params:
+      name = request.params['university.name']
+      country = request.params['university.country']
+      city = request.params['university.city']
+      university_from_bd = DBSession.query(University).filter(University.name==name).first()
+      if university_from_bd:
+         return{'url': request.application_url + '/addarticle/',
+                'university_error': 'Такой университет уже есть в базе данных',
+                'universities': universities,
+                'authors': authors,
+                'articles': articles}
+      if name == "" or country == "" or city == "":
+         return{'url': request.application_url + '/addarticle/',
+                'university_error': 'Нельзя оставлять пустые поля',
+                'universities': universities,
+                'authors': authors,
+                'articles': articles}
+      try:
+         new_university = University (name = name,
+                                      country = country,
+                                      city = city)
+         DBSession.add(new_university)
+      except:
+         return{'url': request.application_url + '/addarticle/',
+                'university_error': 'Не удалось добавить в базу данных',
+                'universities': universities,
+                'authors': authors,
+                'articles': articles}
+
+# Вставка автора
+   if 'author.submitted' in request.params:
+      name = request.params['author.full_name']
+      university = request.params['author.university']
+      author_from_bd = DBSession.query(Author).filter(Author.full_name==name).first()
+      if author_from_bd:
+         return{'url': request.application_url + '/addarticle/',
+                'author_error': 'Такой автор уже есть в базе данных',
+                'universities': universities,
+                'authors': authors,
+                'articles': articles}
+      if name == "":
+         return{'url': request.application_url + '/addarticle/',
+                'author_error': 'Нельзя оставлять пустые поля',
+                'universities': universities,
+                'authors': authors,
+                'articles': articles}
+      try:
+         university_id = DBSession.query(University.id).filter(University.name==university).first()
+         new_author = Author (full_name = name,
+                              university_id = university_id)
+         DBSession.add(new_author)
+      except:
+         return{'url': request.application_url + '/addarticle/',
+                'author_error': 'Не удалось добавить в базу данных',
+                'universities': universities,
+                'authors': authors,
+                'articles': articles}
+      
+# Вставка пары автор-статья
+   if 'article_author.submitted' in request.params:
+      author = request.params['article_author.author']
+      author_id_tupl = DBSession.query(Author.id).filter(Author.full_name==author).first()
+      author_id = author_id_tupl[0]
+      article = request.params['article_author.article']
+      article_id_tuple = DBSession.query(Article.id).filter(Article.name==article).first()
+      article_id = article_id_tuple[0]
+      article_author_from_bd = DBSession.query(Article_Author).\
+                       filter(Article_Author.article_id==article_id).\
+                       filter(Article_Author.author_id==author_id).first()
+      if article_author_from_bd:
+         return{'url': request.application_url + '/addarticle/',
+                'article_author_error': 'Такая пара статья-автор уже есть в базе данных',
+                'universities': universities,
+                'authors': authors,
+                'articles': articles}
+      try:
+         new_article_author = Article_Author (article_id = article_id,
+                              author_id = author_id)
+         DBSession.add(new_article_author)
+      except:
+         return{'url': request.application_url + '/addarticle/',
+                'article_author_error': 'Не удалось добавить в базу данных',
+                'universities': universities,
+                'authors': authors,
+                'articles': articles}
+
+      
+
+   return{
+         'url': request.application_url + '/addarticle/',
+         'bad_password': False,
+         'universities': universities,
+         'authors': authors,
+         'articles': articles}
+   
+
 
 
 conn_err_msg = """\
